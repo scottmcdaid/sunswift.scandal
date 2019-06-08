@@ -27,7 +27,7 @@
  * along with Scandal.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <io.h>
+#include <msp430.h>
 #include <signal.h>
 #include "scandal_eeprom.h"
 #include "scandal_led.h"

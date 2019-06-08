@@ -4,7 +4,8 @@
 
 #include <iomacros.h>
 #include <signal.h>
-#include <msp430x14x.h>
+//scott #include <msp430x14x.h>
+#include <msp430.h>
 
 static char * tx_buf_start;
 static char * tx_buf_ptr;
@@ -34,7 +35,7 @@ uart0_rx_int(void) {
 
 void UART_Init(uint32_t baudrate) {
 	UCTL0 = SWRST | CHAR; /* Leave in reset mode, set to 8 bit data (8N1) */
-	UTCTL0 = SSEL_SMCLK; /* SMCLK */
+	UTCTL0 = SSEL1; /* SMCLK */
 
 	/* This is a workaround as the UART seems to 
 	 * automatically generate an interrupt when interrups are enabled
@@ -133,7 +134,7 @@ void UART_baud_rate(u32 rate, u32 clock_speed){
 
   case 9600:
     /* Clock = 7.37Mhz, Baud Rate = 9600bps, Divisor = 768 */
-    UBR00=0x00; UBR10=0x03; UMCTL=0x00;
+    UBR00=0x00; UBR10=0x03; UMCTL0=0x00;
     break; 
 
   case 38400:
@@ -142,7 +143,7 @@ void UART_baud_rate(u32 rate, u32 clock_speed){
 
   case 115200:
     /* Clock = 7.37Mhz, Baud Rate = 115200bps, Divisor = 64 */
-    UBR00=0x40; UBR10=0x00; UMCTL=0x00;
+    UBR00=0x40; UBR10=0x00; UMCTL0=0x00;
     break; 
   }
 

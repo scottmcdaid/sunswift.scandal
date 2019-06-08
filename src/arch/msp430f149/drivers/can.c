@@ -114,12 +114,11 @@ void init_can(void){
 
 	/* Set up recieve filters */
 	value = 0;
-	value |= (MCP2510_RECEIVE_EXTENDED << trRXM00); // lets receive ext messages in rx buffer 0
+	value |= (MCP2510_RECEIVE_EXTENDED << trRXM00); // SCOTT: this disables filter
 	value |= (1 << trFILHIT00); // use acceptance filter 1
 	MCP2510_write(RXB0CTRL, &value, 1);
 
 	value = 0;
-	value |= (MCP2510_RECEIVE_STANDARD << trRXM01); // lets receive std messages in rx buffer 1
 	value |= (0<<trFILHIT12) | (1<<trFILHIT11) | (0<<trFILHIT10); // use acceptance filter 2
 	MCP2510_write(RXB1CTRL, &value, 1);
 
@@ -177,18 +176,10 @@ u08 can_get_msg(can_msg* msg){
 	rx_num_msgs--;
 	enable_can_interrupt();
 
-	return(NO_ERR);
 #else
-	switch(msg->ext) {
-	 case CAN_STD_MSG:
-		return MCP2510_transmit_std_message(msg->id, msg->data, msg->length, (msg->id >> 21) & 0xFF);
-		break;
-
-	 case CAN_EXT_MSG:
-		return MCP2510_transmit_message(msg->id, msg->data, msg->length, (msg->id >> 21) & 0xFF);
-		break;
-	}
+	return(MCP2510_receive_message(&(msg->id), msg->data, &(msg->length), &(msg->ext)));
 #endif
+	return(NO_ERR);
 }
 
 /* Send a message to the CAN controller */
@@ -203,6 +194,11 @@ u08 can_send_msg(can_msg* msg, u08 priority){
 #endif
 }
 
+
+u08 can_send_std_msg(can_msg* msg, u08 priority) {
+	return(MCP2510_transmit_std_message(msg->id, msg->data, msg->length, priority));
+}
+
 #if CAN_TX_BUFFER_SIZE > 0
 u08 enqueue_message(can_msg* msg){
 	u08 pos;
@@ -214,6 +210,7 @@ u08 enqueue_message(can_msg* msg){
 	pos = (tx_buf_start + tx_num_msgs) & CAN_TX_BUFFER_MASK;
 
 	cantxbuf[pos].id = msg->id;
+	cantxbuf[pos].ext = msg->ext;
 	for(i=0; i<8; i++)
 		cantxbuf[pos].data[i] = msg->data[i];
 	cantxbuf[pos].length = msg->length;
@@ -272,12 +269,14 @@ u08 buffer_received(void){
 			disable_can_interrupt();
 			pos = (rx_buf_start + rx_num_msgs) & CAN_RX_BUFFER_MASK;
 			msg = (can_msg*)&(canrxbuf[pos]);
-
+      msg->id=0x69A5;
 			err = MCP2510_receive_message(&(msg->id), msg->data, &(msg->length), &(msg->ext));
 
 			if(err == NO_ERR) {
-				rx_num_msgs++;
-			}
+        msg->id++;
+        enqueue_message(msg);
+        msg->id--;
+				rx_num_msgs++; }
 			enable_can_interrupt();
 		}
 	}
@@ -530,18 +529,20 @@ u08 MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext){
 		   extended identifiers */
 		MCP2510_read(RXB0SIDH, buf, 4);
 
-		/* Check to make sure we haven't received a standard length ID */
-		if(!(buf[1] & (1 << EXIDE))){
-			return(STD_ID_ERR);
-		}
-
-		(*id) = ((u32)buf[0]) << 21;
-		(*id) |= ((u32)(buf[1] >> 5) & 0x07) << 18 ;
-		(*id) |= ((u32)(buf[1] & 0x03)) << 16;
-		(*id) |= ((u32)buf[2]) << 8;
-		(*id) |= ((u32)buf[3]) << 0;
-
-		(*ext) = 1;
+    /* Check message type */
+    if(buf[1] & (1 << EXIDE)){
+      (*id) = ((u32)buf[0]) << 21;
+      (*id) |= ((u32)(buf[1] >> 5) & 0x07) << 18 ;
+      (*id) |= ((u32)(buf[1] & 0x03)) << 16;
+      (*id) |= ((u32)buf[2]) << 8;
+      (*id) |= ((u32)buf[3]) << 0;
+      //(*id) = 0x1ebbddcc;
+      (*ext) = 1;
+    } else {
+      (*id) = ((u32)buf[0]) << 3;
+      (*id) |= ((u32)buf[1] & 0x70) >> 5;
+      (*ext) = 0;
+    }
 
 		/* Read the length */
 		MCP2510_read(RXB0DLC, buf, 1);
@@ -556,8 +557,9 @@ u08 MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext){
 
 		return NO_ERR;
 	}
-
-	/* if we receive an interrupt for RXBUF1, it will be a standard tritium message */
+//#ifdef STD_ENABLE
+#if 1
+  /* if we receive an interrupt for RXBUF1, it will be a standard tritium message */
 	if(value & (1<<STATUS_RX1IF)) { /* Valid message recieved */
 		/* Make sure we haven't suffered an overflow error */
 		MCP2510_read(EFLG, buf, 1);
@@ -569,16 +571,22 @@ u08 MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext){
 		}
 
 		/* Copy in the identifier */
-		MCP2510_read(RXB1SIDH, buf, 2);
+		MCP2510_read(RXB1SIDH, buf, 4);
 
-		/* Check to make sure we haven't received a ext length ID */
-		if((buf[1] & (0 << EXIDE)))
-			return(EXT_ID_ERR);
-
-		(*id) = ((u32)buf[0]) << 3;
-		(*id) |= ((u32)buf[1] & 0x70) >> 5;
-
-		(*ext) = 0;
+		/* Check message type */
+		if(buf[1] & (1 << EXIDE)){
+      (*id) = ((u32)buf[0]) << 21;
+      (*id) |= ((u32)(buf[1] >> 5) & 0x07) << 18 ;
+      (*id) |= ((u32)(buf[1] & 0x03)) << 16;
+      (*id) |= ((u32)buf[2]) << 8;
+      (*id) |= ((u32)buf[3]) << 0;
+      //(*id) = 0x1abbddcc;
+      (*ext) = 1;
+	  } else {
+      (*id) = ((u32)buf[0]) << 3;
+      (*id) |= ((u32)buf[1] & 0x70) >> 5;
+      (*ext) = 0;
+    }
 
 		/* Read the length */
 		MCP2510_read(RXB1DLC, buf, 1);
@@ -591,7 +599,7 @@ u08 MCP2510_receive_message(u32* id, u08* buf, u08* length, u08 *ext){
 
 		return NO_ERR;
 	}
-
+#endif
 	/* There was no message to be recieved,
 	 return an error */
 	return NO_MSG_ERR;

@@ -1,5 +1,5 @@
 #include <scandal/system.h>
-#include <io.h>
+#include <msp430.h>
 
 void system_reset(void) {
 	/* Reset the node here */

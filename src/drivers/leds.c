@@ -34,10 +34,11 @@
 #else
 #if defined(msp430f149)
 #include <project/hardware.h>
+#include <arch/gpio.h>
 #endif
 #endif
 
-#include <arch/gpio.h>
+//#include <arch/gpmsp430.h>
 
 void red_led(u08 on) {
 	if (on)

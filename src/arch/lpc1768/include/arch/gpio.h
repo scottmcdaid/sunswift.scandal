@@ -1,5 +1,5 @@
 /***********************************************************************//**
- * @file		lpc17xx_gpio.h
+ * @file		lpc17xx_gpmsp430.h
  * @brief		Contains all macro definitions and function prototypes
  * 				support for GPIO firmware library on LPC17xx
  * @version		3.0

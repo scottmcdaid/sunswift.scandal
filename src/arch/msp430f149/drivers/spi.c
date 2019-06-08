@@ -25,7 +25,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Sunswift USBCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <io.h>
+#include <msp430.h>
 
 #include <project/spi_devices.h>
 #include <scandal/spi.h>
@@ -88,7 +88,7 @@ u08 spi_transfer(u08 out_data){
 		timeout--;
 
 	if (timeout == 0) {
-		toggle_red_led();
+		//toggle_red_led();
 		return 0;
 	}
 

@@ -21,7 +21,7 @@
 ****************************************************************************/
 #include <project/driver_config.h>
 #if CONFIG_ENABLE_DRIVER_SSP==1
-#include <arch/gpio.h>
+#include <arch/gpmsp430.h>
 #include <arch/ssp.h>
 
 /* statistics of all the interrupts */

@@ -26,7 +26,6 @@
  */
 
 #include <project/scandal_config.h>
-#include <project/driver_config.h>
 
 #include <arch/uart.h>
 #include <arch/wdt.h> 
@@ -42,7 +41,6 @@
 #include <scandal/utils.h>
 #include <scandal/wavesculptor.h>
 #include <scandal/system.h>
-#include <scandal/stdio.h>
 
 
 
@@ -100,7 +98,7 @@ u08 scandal_init(void){
 	sc_read_conf(&my_config);
 
 	if(my_config.version != SCANDAL_VERSION)
-		do_first_run();
+               do_first_run();
 	
     /* Handle channel overrides from scandal configuration */
 	scandal_handle_channel_overrides();
@@ -551,7 +549,7 @@ u08	scandal_handle_config(can_msg* msg){
 
 	if(dest_node != scandal_get_addr())
 		return NO_ERR;
-
+ 
 	switch(param){
 	case CONFIG_ADDR:
 		/* 0 is the configuration broadcast address */

@@ -1,8 +1,9 @@
 #include <scandal/wdt.h>
-#include <io.h>
+#include <msp430.h>
+#include <stdint.h>
 
-void WDT_Init(void) {
-
+void WDT_Init(uint32_t wdt_time) {
+  (void)wdt_time;
 }
 
 void WDT_Feed() {

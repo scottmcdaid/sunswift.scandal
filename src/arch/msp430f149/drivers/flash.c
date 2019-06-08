@@ -6,7 +6,7 @@
 	Date: 4/7/03
    -------------------------------------------------------------------------- */ 
    
-#include <io.h>
+#include <msp430.h>
 #include <signal.h>
 #include <scandal/eeprom.h>
 

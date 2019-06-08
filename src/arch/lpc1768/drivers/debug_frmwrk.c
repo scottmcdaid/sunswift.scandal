@@ -215,7 +215,7 @@ void UARTPutHex32 (LPC_UART_TypeDef *UARTx, uint32_t hexnum)
 
 ///*********************************************************************//**
 // * @brief		print function that supports format as same as printf()
-// * 				function of <stdio.h> library
+// * 				function of <stdmsp430.h> library
 // * @param[in]	None
 // * @return		None
 // **********************************************************************/

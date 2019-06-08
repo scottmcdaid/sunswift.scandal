@@ -26,12 +26,13 @@
  * along with Sunswift USBCAN.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <io.h>
+#include <msp430.h>
 #include <signal.h>
 
 #include <scandal/timer.h>
 
 static volatile u32 ms;
+//static volatile u16 sw_divide14;
 
 /* Interrupt handler associated with internal RTC */
 /* Timer A overflow interrupt */
@@ -46,14 +47,17 @@ void sc_init_timer(void){
   /* Use TimerA to create periodic interrupts */
   
   /* Clear counter, input divider /1, ACLK */
-  TACTL = /*TAIE |*/ TACLR | ID_DIV1 | TASSEL_ACLK;
+  TACTL = /*TAIE |*/ TACLR | ID_0 | TASSEL_1;
+  /* Clear counter, input divider /8, SMCLK */
+  //TACTL = /*TAIE |*/ TACLR | ID_3 | TASSEL_2;
 
   /* Enable Capture/Compare interrupt */
   TACCTL0 = CCIE;
   TACCR0 = 32767; /* Count 1 sec at ACLK=32768Hz */
+  //TACCR0 = 65536; /* Count 1 sec at ACLK=32768Hz */
   
   /* Start timer in up to CCR0 mode */
-  TACTL |= MC_UPTO_CCR0;
+  TACTL |= MC_1; //UPTO_CCR0;
 }
 
 void sc_set_timer(sc_time_t time){
@@ -87,6 +91,8 @@ sc_time_t sc_get_timer(void){
   TACCTL0 |= CCIE; 
 
   time += ((tar_copy * 1000) >> 15);
+  //tar_copy = ((tar_Copy*1000) >> 16);
+  //time += sw_divide14
 
   return time;
 }

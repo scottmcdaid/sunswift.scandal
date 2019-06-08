@@ -31,7 +31,7 @@
 
 #include <msp430x14x.h>
 #include <signal.h>
-#include <stdio.h>
+#include <stdmsp430.h>
 #include <string.h>
 
 #include "scandal_types.h"

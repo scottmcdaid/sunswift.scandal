@@ -20,7 +20,7 @@
  * use without further testing or modification.
 ****************************************************************************/
 #include <project/driver_config.h>
-#include <arch/gpio.h>
+#include <arch/gpmsp430.h>
 
 #define NUM_PORTS 4
 #define MAX_NUM_HANDLERS 12

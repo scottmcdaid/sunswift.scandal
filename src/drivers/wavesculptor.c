@@ -3,7 +3,7 @@
 #include <scandal/wavesculptor.h>
 #include <scandal/tritium.h>
 #include <scandal/can.h>
-#include <scandal/stdio.h>
+//scott #include <scandal/stdmsp430.h>
 #include <scandal/error.h> //Added
 #include <scandal/message.h>
 

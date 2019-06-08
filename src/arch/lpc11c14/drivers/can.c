@@ -53,7 +53,7 @@
 #include <arch/gpio.h>
 #include <arch/timer.h>
 
-#include <scandal/stdio.h>
+#include <scandal/stdmsp430.h>
 
 #include <scandal/can.h>
 #include <scandal/error.h>

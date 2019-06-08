@@ -1,5 +1,8 @@
-#include <arch/gpio.h>
-#include <msp430x14x.h>
+//scott #include <arch/gpmsp430.h>
+//#include <msp430x14x.h>
+#include <msp430.h>
+
+typedef unsigned long uint32_t;
 
 void GPIO_Init( void ) {
 	/* Nothing to do here for msp430 */
